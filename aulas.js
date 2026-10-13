@@ -2,7 +2,7 @@
 // Para cada vídeo novo: copie um bloco de aula, troque o número, os textos, o PDF e a prévia.
 window.LENTE = {
   // Passo 1 do LEIA-ME: cole aqui a URL do Apps Script (termina em /exec)
-  APPS_SCRIPT_URL: "",
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxahuwyJHa6F3ETvNgzHldMVIGzq6vyTCZU8Eo29hR5nLf3yDP4MsXKHA5G6VY5eEg/exec",
 
   // Endereço do canal (botão "assistir às próximas aulas")
   CANAL_URL: "https://www.youtube.com/",
