@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<!-- Tela final 1920×1080 (renderizada a 2× = 4K). Canto superior direito (x≥1380, y≤350) fica VAZIO. -->
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,900;1,800&display=block" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1920px; height: 1080px; overflow: hidden; position: relative; color: #252525;
+         font-family: "Quicksand", sans-serif; background: #e3e3e3 url(../assets/fundo-limpo.jpg) center/cover; }
+  .logo { position: absolute; left: 90px; top: 70px; width: 300px; }
+  .left { position: absolute; left: 90px; top: 290px; width: 760px; }
+  .kick { font-weight: 700; font-size: 22px; letter-spacing: 4px; text-transform: uppercase; color: #6400f8; }
+  h1 { font-family: "Playfair Display", serif; font-weight: 900; font-size: 84px; line-height: 1; margin: 14px 0 18px; }
+  h1 i { color: #f72a9f; font-weight: 800; }
+  .sub { font-size: 30px; font-weight: 600; }
+  .paper { position: absolute; left: 860px; top: 300px; width: 380px; background: #fff; padding: 10px 10px 4px;
+           box-shadow: 0 22px 44px rgba(37,37,37,.28); transform: rotate(-4deg); }
+  .paper img.m { width: 100%; display: block; }
+  .tape { position: absolute; width: 170px; left: 50%; top: -24px; transform: translateX(-50%) rotate(-5deg); }
+  .qrcard { position: absolute; left: 1300px; top: 380px; width: 520px; background: #fff; border-radius: 22px;
+            padding: 34px 34px 28px; text-align: center; box-shadow: 0 22px 44px rgba(37,37,37,.25); border-top: 10px solid #f72a9f; }
+  .qrcard img { width: 420px; height: 420px; image-rendering: pixelated; display: block; margin: 0 auto; }
+  .scan { font-family: "Caveat", cursive; font-weight: 700; font-size: 44px; color: #8a3e6b; margin-top: 10px; }
+  .url { font-weight: 700; font-size: 22px; color: #6400f8; margin-top: 4px; word-break: break-all; }
+  .desc { position: absolute; left: 90px; top: 880px; font-size: 28px; font-weight: 700; }
+  .desc span { background: #f72a9f; color: #fff; border-radius: 999px; padding: 8px 20px; margin-right: 10px; }
+  .corner { position: absolute; width: 230px; }
+</style>
+</head>
+<body>
+  <img class="corner" src="../assets/canto-pagina.png" style="left:0;bottom:0;transform:rotate(180deg)" alt="">
+  <img class="logo" src="../assets/logo-colorido.png" alt="Lente">
+  <div class="left">
+    <div class="kick" id="kick">Aula 01 · grátis</div>
+    <h1>Baixe o <i>mapa mental</i> desta aula</h1>
+    <p class="sub" id="sub">Tudo o que vimos hoje, num só lugar, para revisar antes da prova.</p>
+  </div>
+  <div class="paper"><img class="tape" src="../assets/fita-rosa.png" alt=""><img class="m" id="prev" src="../previews/aula-01.jpg" alt=""></div>
+  <div class="qrcard">
+    <img id="qr" src="../qr/aula-01.png" alt="QR code">
+    <div class="scan">aponte a câmera do celular</div>
+    <div class="url" id="url"></div>
+  </div>
+  <div class="desc"><span>no celular?</span> toque no link da descrição ↓</div>
+<script>
+  const q = new URLSearchParams(location.search), a = q.get("a") || "01";
+  document.getElementById("kick").textContent = "Aula " + a + " · grátis";
+  document.getElementById("qr").src = "../qr/aula-" + a + ".png";
+  document.getElementById("prev").src = "../previews/aula-" + a + ".jpg";
+  const u = q.get("u") || "";
+  document.getElementById("url").textContent = u.length <= 30 ? u : ""; // URL longa não cabe: QR + link da descrição bastam
+</script>
+</body>
+</html>

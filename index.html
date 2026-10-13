@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa mental grátis · Lente — Profe Lu</title>
+<meta name="description" content="Baixe grátis o mapa mental da aula da Profe Lu — Lente, Leitura dos Clássicos Além do Óbvio.">
+<meta property="og:title" content="Mapa mental grátis · Lente — Profe Lu">
+<meta property="og:image" content="previews/aula-01.jpg">
+<link rel="icon" href="assets/oculos-rosa.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Caveat:wght@700&family=Playfair+Display:wght@800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="brand"><img src="assets/logo-colorido.png" alt="Lente — Leitura dos Clássicos Além do Óbvio · Profe Lu"></header>
+
+  <section class="hero">
+    <div class="kicker" id="kicker">Vestibular UFSC/IFC</div>
+    <h1 id="titulo">Mapa mental grátis</h1>
+    <p class="sub" id="sub"></p>
+    <figure class="preview">
+      <img id="preview" src="" alt="Prévia do mapa mental">
+      <figcaption class="hand">prévia — o mapa completo é seu, grátis</figcaption>
+    </figure>
+  </section>
+
+  <section class="card" id="form-card">
+    <img class="tape" src="assets/fita-rosa.png" alt="">
+    <h2>Receba o mapa mental</h2>
+    <form id="lead-form" novalidate>
+      <label>Nome completo
+        <input name="nome" autocomplete="name" required minlength="5" placeholder="Seu nome e sobrenome">
+      </label>
+      <label>E-mail
+        <input name="email" type="email" autocomplete="email" required placeholder="voce@email.com">
+      </label>
+      <label>WhatsApp (com DDD)
+        <input name="whatsapp" type="tel" inputmode="numeric" autocomplete="tel" required placeholder="(48) 99999-9999">
+      </label>
+      <input class="hp" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <label class="check"><input type="checkbox" name="consent" required>
+        <span>Quero receber o mapa mental e conteúdos do Método Lente por e-mail. Li a <a href="privacidade.html" target="_blank">política de privacidade</a>.</span></label>
+      <label class="check"><input type="checkbox" name="whats_ok">
+        <span>Aceito receber mensagens da Profe Lu no WhatsApp <em>(opcional)</em>.</span></label>
+      <label class="check"><input type="checkbox" name="idade" required>
+        <span>Tenho 18 anos ou mais, ou tenho autorização do meu responsável.</span></label>
+
+      <p class="err" id="err" role="alert"></p>
+      <button type="submit" id="btn">Quero meu mapa mental</button>
+      <p class="small">Grátis. Você pode cancelar quando quiser.</p>
+    </form>
+
+    <div id="ok" hidden>
+      <div class="hand big">Pronto, <span id="ok-nome"></span>!</div>
+      <a class="btn" id="dl" href="#" download>Baixar o mapa mental (PDF)</a>
+      <p>Também enviamos o link para o seu e-mail.</p>
+      <a class="link" id="canal" href="#" target="_blank">Assistir às próximas aulas →</a>
+    </div>
+  </section>
+
+  <footer>
+    <a href="privacidade.html">Política de privacidade</a> · Lente — Leitura dos Clássicos Além do Óbvio · Profe Lu
+  </footer>
+</main>
+<script src="aulas.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
