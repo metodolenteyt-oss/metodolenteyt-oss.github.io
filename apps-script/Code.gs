@@ -46,7 +46,6 @@ function enviaEmail_(email, nome, aula) {
         "<p>Obrigada por assistir à aula. Clique para baixar o PDF:</p>" +
         '<p><a href="' + link + '" style="background:#f72a9f;color:#fff;padding:14px 22px;border-radius:30px;text-decoration:none;font-weight:bold">Baixar o mapa mental</a></p>' +
         "<p>Nos próximos vídeos tem mais mapa — fique de olho no canal.</p>" +
-        "<p>Beijo,<br><b>Profe Lu</b></p>" +
         '<p style="font-size:11px;color:#777">Você recebeu este e-mail porque pediu o mapa mental no site do Método Lente. ' +
         "Para não receber mais, responda com a palavra SAIR.</p></div>",
     });
