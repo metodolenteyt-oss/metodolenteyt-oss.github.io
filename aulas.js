@@ -8,6 +8,13 @@ window.LENTE = {
   CANAL_URL: "https://www.youtube.com/",
 
   AULAS: {
+    "00": {
+      kicker: "Aula 00 · Vestibular UFSC/IFC 2027",
+      titulo: "Mapa mental: como é a prova da UFSC",
+      sub: "Quem organiza, datas e horários, o que cai em cada dia e como funciona a questão somatória — tudo numa página.",
+      pdf: "mapas/aula-00-bf0f13.pdf",
+      preview: "previews/aula-00.jpg"
+    },
     "01": {
       kicker: "Aula 01 · Vestibular UFSC/IFC 2027",
       titulo: "Mapa mental das 7 obras da UFSC",
