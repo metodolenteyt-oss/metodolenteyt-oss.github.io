@@ -110,6 +110,7 @@ function onOpen() {
   SpreadsheetApp.getUi().createMenu("M\u00E9todo Lente")
     .addItem("Configurar / atualizar CRM", "configurarCRM")
     .addItem("Reconstruir CRM a partir de Leads", "reconstruirCRM")
+    .addItem("Atualizar painel", "painel_")
     .addToUi();
 }
 
@@ -189,6 +190,11 @@ function configurarCRM() {
     .setFontColor("#c0003f").setBold(true).setRanges([sh.getRange("M2:M")]).build());
   sh.setConditionalFormatRules(rules);
   if (sh.getFilter() == null) sh.getRange(1, 1, sh.getMaxRows(), CRM_COLS.length).createFilter();
+  sh.getBandings().forEach((b) => b.remove());
+  sh.getRange(1, 1, sh.getMaxRows(), CRM_COLS.length).applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false)
+    .setHeaderRowColor("#252525").setFirstRowColor("#ffffff").setSecondRowColor("#f7f5fa");
+  sh.getRange("A:N").setFontFamily("Quicksand").setVerticalAlignment("middle");
+  sh.setRowHeight(1, 34);
   reconstruirCRM(true);
   painel_();
   ss.setActiveSheet(sh);
@@ -237,32 +243,104 @@ function reconstruirCRM(silencioso) {
 function painel_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const p = ss.getSheetByName(PAINEL) || ss.insertSheet(PAINEL, 1);
-  p.clear();
-  p.getRange("A1").setValue("M\u00E9todo Lente \u00B7 Painel de leads").setFontSize(18).setFontWeight("bold");
+  p.getCharts().forEach((c) => p.removeChart(c));
+  p.clear(); p.clearFormats();
+  p.getBandings().forEach((b) => b.remove());
+  if (p.getMaxColumns() < 24) p.insertColumnsAfter(p.getMaxColumns(), 24 - p.getMaxColumns());
+  p.setHiddenGridlines(true);
+  const F = "Quicksand", INK = "#252525", BG = "#f4f4f6";
+  p.getRange("A1:L80").setBackground(BG).setFontFamily(F).setFontColor(INK).setVerticalAlignment("middle");
+  for (let c = 1; c <= 12; c++) p.setColumnWidth(c, 112);
+  p.setColumnWidth(13, 24);
+
+  // faixa de titulo
+  p.setRowHeight(1, 46); p.setRowHeight(2, 24);
+  p.getRange("A1:L2").setBackground(INK);
+  p.getRange("A1:H1").merge().setValue("M\u00C9TODO LENTE  \u00B7  PAINEL DE LEADS")
+    .setFontSize(18).setFontWeight("bold").setFontColor("#ffffff");
+  p.getRange("A2:H2").merge().setValue("Capta\u00E7\u00E3o pelos mapas mentais das aulas e funil de venda do curso")
+    .setFontSize(10).setFontColor("#cfcfcf");
+  p.getRange("I1:L2").merge().setFormula('="Atualizado em "&TEXT(NOW(),"dd/mm/yyyy hh:mm")')
+    .setFontSize(10).setFontColor("#cfcfcf").setHorizontalAlignment("right");
+  p.getRange("A1:L2").setBorder(null, null, true, null, null, null, "#f72a9f", SpreadsheetApp.BorderStyle.SOLID_THICK);
+
+  // cartoes de KPI (2 colunas cada)
   const kpis = [
-    ["Pessoas no CRM", "=COUNTA(CRM!B2:B)"],
-    ["Downloads de mapas", "=COUNTA(Leads!C2:C)"],
-    ["Aceitam WhatsApp", '=COUNTIF(CRM!E2:E,"sim")'],
-    ["Leads quentes", '=COUNTIF(CRM!K2:K,"Quente")'],
-    ["Follow-ups vencidos", '=COUNTIFS(CRM!M2:M,"<="&TODAY(),CRM!L2:L,"<>Comprou",CRM!L2:L,"<>Perdido")'],
-    ["Compraram o curso", '=COUNTIF(CRM!L2:L,"Comprou")'],
-    ["Convers\u00E3o", "=IFERROR(B8/B3,0)"],
+    ["PESSOAS NO CRM", "=COUNTA(CRM!B2:B)", "0", "#6400f8"],
+    ["DOWNLOADS", "=COUNTA(Leads!C2:C)", "0", "#01c8f1"],
+    ["ACEITAM WHATSAPP", '=COUNTIF(CRM!E2:E,"sim")', "0", "#25d366"],
+    ["LEADS QUENTES", '=COUNTIF(CRM!K2:K,"Quente")', "0", "#f72a9f"],
+    ["FOLLOW-UPS VENCIDOS", '=COUNTIFS(CRM!M2:M,"<="&TODAY(),CRM!L2:L,"<>Comprou",CRM!L2:L,"<>Perdido")', "0", "#c0003f"],
+    ["CONVERS\u00C3O EM VENDA", '=IFERROR(COUNTIF(CRM!L2:L,"Comprou")/COUNTA(CRM!B2:B),0)', "0.0%", "#8a3e6b"],
   ];
-  p.getRange(3, 1, kpis.length, 2).setValues(kpis);
-  p.getRange("B9").setNumberFormat("0.0%");
-  p.getRange("A3:A9").setFontWeight("bold");
-  p.getRange("B3:B9").setFontSize(14).setFontWeight("bold").setFontColor("#6400f8").setHorizontalAlignment("left");
-  const blocos = [
-    ["D2", "Funil (etapa)", '=QUERY(CRM!L2:L,"select L, count(L) where L is not null group by L label count(L) \'\'",0)'],
-    ["G2", "Downloads por aula", '=QUERY(Leads!E2:E,"select E, count(E) where E is not null group by E label count(E) \'\'",0)'],
-    ["J2", "Origem", '=QUERY(Leads!F2:F,"select F, count(F) where F is not null group by F label count(F) \'\'",0)'],
-    ["D12", "Ligar / mandar mensagem hoje", '=IFERROR(SORT(FILTER({CRM!A2:A,CRM!L2:L,CRM!M2:M,CRM!D2:D},CRM!M2:M<>"",CRM!M2:M<=TODAY(),CRM!L2:L<>"Comprou",CRM!L2:L<>"Perdido"),3,TRUE),"Nada pendente")'],
-    ["D24", "Quentes sem contato", '=IFERROR(FILTER({CRM!A2:A,CRM!F2:F,CRM!D2:D},CRM!K2:K="Quente",CRM!L2:L="Novo"),"Nenhum")'],
-  ];
-  blocos.forEach((b) => {
-    const c = p.getRange(b[0]);
-    c.setValue(b[1]).setFontWeight("bold").setBackground("#fae1f0");
-    c.offset(1, 0).setFormula(b[2]);
+  p.setRowHeight(3, 14); p.setRowHeight(4, 26); p.setRowHeight(5, 30); p.setRowHeight(6, 30); p.setRowHeight(7, 22);
+  kpis.forEach((k, i) => {
+    const c = 1 + i * 2;
+    const card = p.getRange(4, c, 4, 2);
+    card.setBackground("#ffffff")
+      .setBorder(true, true, true, true, null, null, "#e1e1e6", SpreadsheetApp.BorderStyle.SOLID);
+    p.getRange(4, c, 1, 2).setBorder(true, null, null, null, null, null, k[3], SpreadsheetApp.BorderStyle.SOLID_THICK);
+    p.getRange(4, c, 1, 2).merge().setValue(k[0]).setFontSize(9).setFontWeight("bold").setFontColor("#7a7a85")
+      .setHorizontalAlignment("center");
+    p.getRange(5, c, 2, 2).merge().setFormula(k[1]).setNumberFormat(k[2]).setFontSize(28).setFontWeight("bold")
+      .setFontColor(k[3]).setHorizontalAlignment("center");
   });
-  p.setColumnWidth(1, 190); p.setColumnWidth(4, 190); p.setColumnWidth(7, 150); p.setColumnWidth(10, 120);
+  p.getRange("A7:B7").merge().setFormula('="+"&COUNTIF(CRM!I2:I,">="&TODAY()-7)&" nos \u00FAltimos 7 dias"');
+  p.getRange("C7:D7").merge().setFormula('=IFERROR(TEXT(COUNTA(Leads!C2:C)/COUNTA(CRM!B2:B),"0.0")&" mapas por pessoa","")');
+  p.getRange("E7:F7").merge().setFormula('=IFERROR(TEXT(COUNTIF(CRM!E2:E,"sim")/COUNTA(CRM!B2:B),"0%")&" do total","")');
+  p.getRange("G7:H7").merge().setFormula('=COUNTIFS(CRM!K2:K,"Quente",CRM!L2:L,"Novo")&" ainda sem contato"');
+  p.getRange("I7:J7").merge().setValue("agenda vencida");
+  p.getRange("K7:L7").merge().setFormula('=COUNTIF(CRM!L2:L,"Comprou")&" alunos"');
+  p.getRange("A7:L7").setFontSize(9).setFontColor("#7a7a85").setHorizontalAlignment("center");
+
+  // dados auxiliares dos graficos (colunas N:W, ocultas)
+  p.getRange("N1").setFormula('=QUERY(Leads!A2:C,"select toDate(A), count(C) where C is not null group by toDate(A) label toDate(A) \'Dia\', count(C) \'Leads\'",0)');
+  p.getRange("P1:Q1").setValues([["Etapa", "Pessoas"]]);
+  ETAPAS.forEach((e, i) => p.getRange(2 + i, 16, 1, 2).setValues([[e, '=COUNTIF(CRM!L2:L,"' + e + '")']]));
+  p.getRange("S1").setFormula('=QUERY(Leads!E2:E,"select E, count(E) where E is not null group by E label E \'Aula\', count(E) \'Downloads\'",0)');
+  p.getRange("U1").setFormula('=QUERY(Leads!F2:F,"select F, count(F) where F is not null group by F label F \'Origem\', count(F) \'Downloads\'",0)');
+  p.getRange("W1:X1").setValues([["Temperatura", "Pessoas"]]);
+  ["Quente", "Morno", "Frio"].forEach((t, i) => p.getRange(2 + i, 23, 1, 2).setValues([[t, '=COUNTIF(CRM!K2:K,"' + t + '")']]));
+  p.hideColumns(14, 11);
+
+  // graficos
+  const txt = { color: INK, fontName: F };
+  const base = (b, title, w, h) => b.setOption("title", title).setOption("titleTextStyle", { color: INK, fontName: F, fontSize: 13, bold: true })
+    .setOption("backgroundColor", { fill: "#ffffff", stroke: "#e1e1e6", strokeWidth: 1 })
+    .setOption("legend", { position: "none" }).setOption("width", w).setOption("height", h)
+    .setOption("hAxis", { textStyle: txt, gridlines: { color: "#eeeeee" } })
+    .setOption("vAxis", { textStyle: txt, gridlines: { color: "#eeeeee" }, minValue: 0 });
+  p.setRowHeight(8, 14);
+  p.insertChart(base(p.newChart().setChartType(Charts.ChartType.AREA).addRange(p.getRange("N1:O400")), "Leads por dia", 806, 300)
+    .setOption("colors", ["#6400f8"]).setOption("areaOpacity", 0.15).setOption("lineWidth", 3).setOption("pointSize", 5)
+    .setPosition(9, 1, 0, 0).build());
+  p.insertChart(base(p.newChart().setChartType(Charts.ChartType.PIE).addRange(p.getRange("W1:X4")), "Temperatura", 520, 300)
+    .setOption("pieHole", 0.55).setOption("colors", ["#f72a9f", "#fae1f0", "#01c8f1"])
+    .setOption("legend", { position: "right", textStyle: txt }).setOption("pieSliceTextStyle", { color: INK, fontName: F })
+    .setPosition(9, 8, 0, 0).build());
+  p.insertChart(base(p.newChart().setChartType(Charts.ChartType.BAR).addRange(p.getRange("P1:Q7")), "Funil de vendas (pessoas por etapa)", 806, 300)
+    .setOption("colors", ["#f72a9f"]).setOption("dataLabel", "value").setOption("bar", { groupWidth: "70%" })
+    .setPosition(25, 1, 0, 0).build());
+  p.insertChart(base(p.newChart().setChartType(Charts.ChartType.PIE).addRange(p.getRange("U1:V20")), "Origem dos downloads", 520, 300)
+    .setOption("pieHole", 0.55).setOption("colors", ["#6400f8", "#01c8f1", "#f72a9f", "#8a3e6b"])
+    .setOption("legend", { position: "right", textStyle: txt }).setPosition(25, 8, 0, 0).build());
+  p.insertChart(base(p.newChart().setChartType(Charts.ChartType.COLUMN).addRange(p.getRange("S1:T60")), "Downloads por aula", 1340, 280)
+    .setOption("colors", ["#01c8f1"]).setOption("dataLabel", "value").setPosition(41, 1, 0, 0).build());
+
+  // listas de acao
+  const lista = (row, titulo, cab, formula, cor) => {
+    p.getRange(row, 1, 1, 12).merge().setValue(titulo).setFontSize(13).setFontWeight("bold")
+      .setBackground("#ffffff").setBorder(true, null, null, null, null, null, cor, SpreadsheetApp.BorderStyle.SOLID_THICK);
+    p.getRange(row + 1, 1, 1, cab.length).setValues([cab]).setFontWeight("bold").setFontSize(9)
+      .setBackground(INK).setFontColor("#ffffff");
+    p.getRange(row + 2, 1).setFormula(formula);
+    p.getRange(row + 2, 1, 12, 12).setBackground("#ffffff").setFontSize(10);
+  };
+  lista(57, "Ligar / mandar mensagem hoje", ["Nome", "Etapa", "Pr\u00F3xima a\u00E7\u00E3o", "WhatsApp"],
+    '=IFERROR(SORT(FILTER({CRM!A2:A,CRM!L2:L,CRM!M2:M,CRM!D2:D},CRM!M2:M<>"",CRM!M2:M<=TODAY(),CRM!L2:L<>"Comprou",CRM!L2:L<>"Perdido"),3,TRUE),"Nada pendente")', "#c0003f");
+  p.getRange("C59:C70").setNumberFormat("dd/mm/yyyy");
+  lista(72, "Leads quentes ainda sem contato", ["Nome", "Aulas", "\u00DAltima atividade", "WhatsApp"],
+    '=IFERROR(SORT(FILTER({CRM!A2:A,CRM!F2:F,CRM!J2:J,CRM!D2:D},CRM!K2:K="Quente",CRM!L2:L="Novo"),3,FALSE),"Nenhum")', "#f72a9f");
+  p.getRange("C74:C85").setNumberFormat("dd/mm/yyyy");
+  p.setFrozenRows(2);
 }
