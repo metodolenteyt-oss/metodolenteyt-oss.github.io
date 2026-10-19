@@ -17,6 +17,21 @@ function onOpen() {
     .addToUi();
 }
 
+// Fórmulas são escritas em inglês com "," e convertidas para o separador do idioma da planilha
+// (pt-BR usa ";" entre argumentos e "\" entre colunas dentro de { }).
+function F_(f) {
+  const loc = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetLocale();
+  if (/^(en|ja|ko|zh|th|he|hi)/.test(loc) || loc === "es_MX") return f;
+  let out = "", q = false, brace = 0;
+  for (const c of f) {
+    if (c === '"') q = !q;
+    if (!q && c === "{") brace++;
+    if (!q && c === "}") brace--;
+    out += !q && c === "," ? (brace > 0 ? "\\" : ";") : c;
+  }
+  return out;
+}
+
 function aula2_(v) {
   const s = String(v == null ? "" : v).replace(/\D/g, "");
   return s ? ("0" + s).slice(-2) : "";
@@ -32,16 +47,16 @@ function crmUpsert_(email, p, quando) {
   if (found) {
     const r = found.getRow();
     const v = sh.getRange(r, 1, 1, 10).getValues()[0];
-    const aulas = String(v[5]).split(",").map((x) => x.trim()).filter(String);
+    const aulas = String(v[5]).split(",").map((x) => aula2_(x)).map((x) => x.trim()).filter(String);
     if (aula && aulas.indexOf(aula) < 0) aulas.push(aula);
     aulas.sort();
     if (p.nome) sh.getRange(r, 1).setValue(limpa_(p.nome));
     if (zap) sh.getRange(r, 3).setValue("'" + zap);
     if (aceita) sh.getRange(r, 5).setValue("sim");
-    sh.getRange(r, 6, 1, 2).setValues([[aulas.join(", "), aulas.length]]);
+    sh.getRange(r, 6, 1, 2).setValues([["'" + aulas.join(", "), aulas.length]]);
     sh.getRange(r, 10).setValue(quando);
   } else {
-    sh.appendRow([limpa_(p.nome), email, zap ? "'" + zap : "", "", aceita ? "sim" : "não", aula,
+    sh.appendRow([limpa_(p.nome), email, zap ? "'" + zap : "", "", aceita ? "sim" : "não", aula ? "'" + aula : "",
                   aula ? 1 : 0, limpa_(p.origem), quando, quando, "", "Novo", "", ""]);
     formulasLinha_(sh, sh.getLastRow());
   }
@@ -49,14 +64,14 @@ function crmUpsert_(email, p, quando) {
 
 function formulasLinha_(sh, r) {
   // D: link do WhatsApp com a mensagem da aba Config (só para quem autorizou)
-  sh.getRange(r, 4).setFormulaR1C1(
+  sh.getRange(r, 4).setFormulaR1C1(F_(
     '=IF(RC2="","",IF(RC5<>"sim","sem autorização",HYPERLINK("https://wa.me/"&REGEXREPLACE(RC3,"\\D","")&"?text="&' +
     'ENCODEURL(SUBSTITUTE(SUBSTITUTE(Config!R2C2,"{nome}",PROPER(REGEXEXTRACT(RC1&" ","^\\S+"))),"{aula}",' +
-    'REGEXEXTRACT(RC6&"","[^,]*$"))),"Abrir conversa")))');
+    'REGEXEXTRACT(RC6&"","[^,]*$"))),"Abrir conversa")))'));
   // K: temperatura = nº de aulas + quão recente foi a última atividade
-  sh.getRange(r, 11).setFormulaR1C1(
+  sh.getRange(r, 11).setFormulaR1C1(F_(
     '=IF(RC2="","",IF(OR(RC7>=3,AND(RC7>=2,TODAY()-RC10<=14),AND(RC12="Interessado",TODAY()-RC10<=30)),"Quente",' +
-    'IF(TODAY()-RC10<=30,"Morno","Frio")))');
+    'IF(TODAY()-RC10<=30,"Morno","Frio")))'));
 }
 
 function configurarCRM() {
@@ -89,7 +104,7 @@ function configurarCRM() {
     rules.push(SpreadsheetApp.newConditionalFormatRule().whenTextEqualTo(t[0]).setBackground(t[1])
       .setFontColor(t[2]).setBold(true).setRanges([sh.getRange("K2:K")]).build()));
   rules.push(SpreadsheetApp.newConditionalFormatRule() // follow-up vencido: data em vermelho
-    .whenFormulaSatisfied('=AND($M2<>"",$M2<=TODAY(),$L2<>"Comprou",$L2<>"Perdido")')
+    .whenFormulaSatisfied(F_('=AND($M2<>"",$M2<=TODAY(),$L2<>"Comprou",$L2<>"Perdido")'))
     .setFontColor("#c0003f").setBold(true).setRanges([sh.getRange("M2:M")]).build());
   sh.setConditionalFormatRules(rules);
   if (sh.getFilter() == null) sh.getRange(1, 1, sh.getMaxRows(), CRM_COLS.length).createFilter();
@@ -133,7 +148,7 @@ function reconstruirCRM(silencioso) {
   const linhas = ordem.map((e) => {
     const x = pessoas[e], m = manual[e] || ["Novo", "", ""];
     x.aulas.sort();
-    return [x.nome, e, x.zap ? "'" + x.zap : "", "", x.aceita ? "sim" : "não", x.aulas.join(", "),
+    return [x.nome, e, x.zap ? "'" + x.zap : "", "", x.aceita ? "sim" : "não", "'" + x.aulas.join(", "),
             x.aulas.length, x.origem, x.ini, x.fim, "", m[0], m[1], m[2]];
   });
   if (linhas.length) {
@@ -163,7 +178,7 @@ function painel_() {
     .setFontSize(18).setFontWeight("bold").setFontColor("#ffffff");
   p.getRange("A2:H2").merge().setValue("Captação pelos mapas mentais das aulas e funil de venda do curso")
     .setFontSize(10).setFontColor("#cfcfcf");
-  p.getRange("I1:L2").merge().setFormula('="Atualizado em "&TEXT(NOW(),"dd/mm/yyyy hh:mm")')
+  p.getRange("I1:L2").merge().setFormula(F_('="Atualizado em "&TEXT(NOW(),"dd/mm/yyyy hh:mm")'))
     .setFontSize(10).setFontColor("#cfcfcf").setHorizontalAlignment("right");
   p.getRange("A1:L2").setBorder(null, null, true, null, null, null, "#f72a9f", SpreadsheetApp.BorderStyle.SOLID_THICK);
 
@@ -185,25 +200,25 @@ function painel_() {
     p.getRange(4, c, 1, 2).setBorder(true, null, null, null, null, null, k[3], SpreadsheetApp.BorderStyle.SOLID_THICK);
     p.getRange(4, c, 1, 2).merge().setValue(k[0]).setFontSize(9).setFontWeight("bold").setFontColor("#7a7a85")
       .setHorizontalAlignment("center");
-    p.getRange(5, c, 2, 2).merge().setFormula(k[1]).setNumberFormat(k[2]).setFontSize(28).setFontWeight("bold")
+    p.getRange(5, c, 2, 2).merge().setFormula(F_(k[1])).setNumberFormat(k[2]).setFontSize(28).setFontWeight("bold")
       .setFontColor(k[3]).setHorizontalAlignment("center");
   });
-  p.getRange("A7:B7").merge().setFormula('="+"&COUNTIF(CRM!I2:I,">="&TODAY()-7)&" nos últimos 7 dias"');
-  p.getRange("C7:D7").merge().setFormula('=IFERROR(TEXT(COUNTA(Leads!C2:C)/COUNTA(CRM!B2:B),"0.0")&" mapas por pessoa","")');
-  p.getRange("E7:F7").merge().setFormula('=IFERROR(TEXT(COUNTIF(CRM!E2:E,"sim")/COUNTA(CRM!B2:B),"0%")&" do total","")');
-  p.getRange("G7:H7").merge().setFormula('=COUNTIFS(CRM!K2:K,"Quente",CRM!L2:L,"Novo")&" ainda sem contato"');
+  p.getRange("A7:B7").merge().setFormula(F_('="+"&COUNTIF(CRM!I2:I,">="&TODAY()-7)&" nos últimos 7 dias"'));
+  p.getRange("C7:D7").merge().setFormula(F_('=IFERROR(TEXT(COUNTA(Leads!C2:C)/COUNTA(CRM!B2:B),"0.0")&" mapas por pessoa","")'));
+  p.getRange("E7:F7").merge().setFormula(F_('=IFERROR(TEXT(COUNTIF(CRM!E2:E,"sim")/COUNTA(CRM!B2:B),"0%")&" do total","")'));
+  p.getRange("G7:H7").merge().setFormula(F_('=COUNTIFS(CRM!K2:K,"Quente",CRM!L2:L,"Novo")&" ainda sem contato"'));
   p.getRange("I7:J7").merge().setValue("agenda vencida");
-  p.getRange("K7:L7").merge().setFormula('=COUNTIF(CRM!L2:L,"Comprou")&" alunos"');
+  p.getRange("K7:L7").merge().setFormula(F_('=COUNTIF(CRM!L2:L,"Comprou")&" alunos"'));
   p.getRange("A7:L7").setFontSize(9).setFontColor("#7a7a85").setHorizontalAlignment("center");
 
   // dados auxiliares dos gráficos (colunas N:W, ocultas)
-  p.getRange("N1").setFormula('=QUERY(Leads!A2:C,"select toDate(A), count(C) where C is not null group by toDate(A) label toDate(A) \'Dia\', count(C) \'Leads\'",0)');
+  p.getRange("N1").setFormula(F_('=QUERY(Leads!A2:C,"select toDate(A), count(C) where C is not null group by toDate(A) label toDate(A) \'Dia\', count(C) \'Leads\'",0)'));
   p.getRange("P1:Q1").setValues([["Etapa", "Pessoas"]]);
-  ETAPAS.forEach((e, i) => p.getRange(2 + i, 16, 1, 2).setValues([[e, '=COUNTIF(CRM!L2:L,"' + e + '")']]));
-  p.getRange("S1").setFormula('=QUERY(Leads!E2:E,"select E, count(E) where E is not null group by E label E \'Aula\', count(E) \'Downloads\'",0)');
-  p.getRange("U1").setFormula('=QUERY(Leads!F2:F,"select F, count(F) where F is not null group by F label F \'Origem\', count(F) \'Downloads\'",0)');
+  ETAPAS.forEach((e, i) => { p.getRange(2 + i, 16).setValue(e); p.getRange(2 + i, 17).setFormula(F_('=COUNTIF(CRM!L2:L,"' + e + '")')); });
+  p.getRange("S1").setFormula(F_('=QUERY(Leads!E2:E,"select E, count(E) where E is not null group by E label E \'Aula\', count(E) \'Downloads\'",0)'));
+  p.getRange("U1").setFormula(F_('=QUERY(Leads!F2:F,"select F, count(F) where F is not null group by F label F \'Origem\', count(F) \'Downloads\'",0)'));
   p.getRange("W1:X1").setValues([["Temperatura", "Pessoas"]]);
-  ["Quente", "Morno", "Frio"].forEach((t, i) => p.getRange(2 + i, 23, 1, 2).setValues([[t, '=COUNTIF(CRM!K2:K,"' + t + '")']]));
+  ["Quente", "Morno", "Frio"].forEach((t, i) => { p.getRange(2 + i, 23).setValue(t); p.getRange(2 + i, 24).setFormula(F_('=COUNTIF(CRM!K2:K,"' + t + '")')); });
   p.hideColumns(14, 11);
 
   // gráficos
@@ -236,7 +251,7 @@ function painel_() {
       .setBackground("#ffffff").setBorder(true, null, null, null, null, null, cor, SpreadsheetApp.BorderStyle.SOLID_THICK);
     p.getRange(row + 1, 1, 1, cab.length).setValues([cab]).setFontWeight("bold").setFontSize(9)
       .setBackground(INK).setFontColor("#ffffff");
-    p.getRange(row + 2, 1).setFormula(formula);
+    p.getRange(row + 2, 1).setFormula(F_(formula));
     p.getRange(row + 2, 1, 12, 12).setBackground("#ffffff").setFontSize(10);
   };
   lista(57, "Ligar / mandar mensagem hoje", ["Nome", "Etapa", "Próxima ação", "WhatsApp"],
