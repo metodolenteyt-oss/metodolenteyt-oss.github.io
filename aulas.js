@@ -21,6 +21,13 @@ window.LENTE = {
       sub: "Clara dos Anjos, A Paixão Segundo G.H., 1º de Abril, Vésperas, O Irmão Alemão, Eu Sou Macuxi e Secos & Molhados — tudo num só mapa para revisar.",
       pdf: "mapas/aula-01-7-obras-ufsc-931343.pdf",
       preview: "previews/aula-01.jpg"
+    },
+    "04": {
+      kicker: "Aula 04 · Vestibular UFSC/IFC 2027",
+      titulo: "Mapa mental: 1º de Abril, de Salim Miguel",
+      sub: "Autor, contexto, estrutura, personagens, linguagem, os capítulos-chave e os temas de Narrativas da Cadeia — tudo numa página.",
+      pdf: "mapas/aula-04-6f52dd.pdf",
+      preview: "previews/aula-04.jpg"
     }
     // "02": { kicker: "Aula 02 · …", titulo: "…", sub: "…", pdf: "mapas/aula-02-….pdf", preview: "previews/aula-02.jpg" },
   }
