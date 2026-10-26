@@ -28,6 +28,13 @@ window.LENTE = {
       sub: "Autor, contexto, estrutura, personagens, linguagem, os capítulos-chave e os temas de Narrativas da Cadeia — tudo numa página.",
       pdf: "mapas/aula-04-6f52dd.pdf",
       preview: "previews/aula-04.jpg"
+    },
+    "06": {
+      kicker: "Aula 06 · Vestibular UFSC 2027",
+      titulo: "Mapa mental: Vésperas, os contos (parte 1)",
+      sub: "Ginny, Dottie, Ana C. e Clarice: quem cada conto homenageia, quem narra, como a história anda e o que pode cair na prova — tudo numa página.",
+      pdf: "mapas/aula-06-b95acc.pdf",
+      preview: "previews/aula-06.jpg"
     }
     // "02": { kicker: "Aula 02 · …", titulo: "…", sub: "…", pdf: "mapas/aula-02-….pdf", preview: "previews/aula-02.jpg" },
   }
