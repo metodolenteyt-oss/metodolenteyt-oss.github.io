@@ -31,8 +31,8 @@ window.LENTE = {
     },
     "06": {
       kicker: "Aula 06 · Vestibular UFSC 2027",
-      titulo: "Mapa mental: Vésperas, os contos (parte 1)",
-      sub: "Ginny, Dottie, Ana C. e Clarice: quem cada conto homenageia, quem narra, como a história anda e o que pode cair na prova — tudo numa página.",
+      titulo: "Mapa mental: Vésperas, os 9 contos",
+      sub: "De Ginny a Sonhadora: quem cada conto homenageia, quem narra, como a história anda e o que pode cair na prova — tudo numa página.",
       pdf: "mapas/aula-06-b95acc.pdf",
       preview: "previews/aula-06.jpg"
     }
