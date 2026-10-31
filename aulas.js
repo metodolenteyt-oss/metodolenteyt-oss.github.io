@@ -22,6 +22,13 @@ window.LENTE = {
       pdf: "mapas/aula-01-7-obras-ufsc-931343.pdf",
       preview: "previews/aula-01.jpg"
     },
+    "02": {
+      kicker: "Aula 02 · FUVEST e UFSC 2027",
+      titulo: "Mapa mental: A Paixão Segundo G.H., de Clarice Lispector",
+      sub: "A autora, a obra, a linguagem, a narradora, o enredo e as temáticas — tudo o que costuma cair, numa página.",
+      pdf: "mapas/aula-02-3e9fe7.pdf",
+      preview: "previews/aula-02.jpg"
+    },
     "04": {
       kicker: "Aula 04 · Vestibular UFSC/IFC 2027",
       titulo: "Mapa mental: 1º de Abril, de Salim Miguel",
@@ -36,6 +43,5 @@ window.LENTE = {
       pdf: "mapas/aula-06-b95acc.pdf",
       preview: "previews/aula-06.jpg"
     }
-    // "02": { kicker: "Aula 02 · …", titulo: "…", sub: "…", pdf: "mapas/aula-02-….pdf", preview: "previews/aula-02.jpg" },
   }
 };
