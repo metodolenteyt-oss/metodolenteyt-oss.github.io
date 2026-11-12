@@ -36,6 +36,13 @@ window.LENTE = {
       pdf: "mapas/aula-04-6f52dd.pdf",
       preview: "previews/aula-04.jpg"
     },
+    "05": {
+      kicker: "Aula 05 · Vestibular UFSC/IFC 2027",
+      titulo: "Mapa mental: Eu sou Macuxi e outras histórias, de Julie Dorrico",
+      sub: "A autora, a obra, a linguagem, os 10 contos, as três vertentes da literatura indígena e as temáticas — tudo numa página.",
+      pdf: "mapas/aula-05-953858.pdf",
+      preview: "previews/aula-05.jpg"
+    },
     "06": {
       kicker: "Aula 06 · Vestibular UFSC 2027",
       titulo: "Mapa mental: Vésperas, os 9 contos",
